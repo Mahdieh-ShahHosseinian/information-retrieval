@@ -1,0 +1,1 @@
+Explores the amount of use of books by categories ofborrowers in the Yale Medical Library, with a view todiscovering the proportion of the catalogue which shouldbe put in machinable form.

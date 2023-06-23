@@ -1,0 +1,138 @@
+java - implement custom keycloak form authenticator? - Stack Overflow Stack Overflow About Products For Teams Stack Overflow Public questions & answers Stack Overflow for Teams Where developers & technologists share private knowledge with coworkers Talent Build your employer brand Advertising Reach developers & technologists worldwide Labs The future of collective knowledge sharing About the company Loading… current community Stack Overflow help chat Meta Stack Overflow your communities Sign up or log in to customize your list. more stack exchange communities company blog Log in Sign up Home Public Questions Tags Users Companies Collectives Explore Collectives Teams Stack Overflow for Teams – Start collaborating and sharing organizational knowledge. Create a free Team Why Teams? Teams Create free Team Collectives™ on Stack Overflow Find centralized, trusted content and collaborate around the technologies you use most. Learn more about Collectives Teams Q&A for work Connect and share knowledge within a single location that is structured and easy to search. Learn more about Teams implement custom keycloak form authenticator? Ask Question Asked today Modified today Viewed 4 times 0 so resently I trying to implement an authentication service using spring boot and keycloak as. IAM tool , my login "get token" functionality could happen by two way, either by phone and password or email and password , i have done some digging and end up with implementing a custom authenticator as a solution, i have done also some digging for implementation: the code goes like below: public class GsmAuthenticator extends UsernamePasswordForm implements Authenticator {
+    public static final String CONFIG_EXTERNAL_APP_URL = "external-application-url";
+    Logger logger = LoggerFactory.getLogger(GsmAuthenticator.class);
+
+    public GsmAuthenticator() {
+         logger.info("GSM authenticator has been created");
+    }
+
+    @Override
+    public boolean validateUserAndPassword(AuthenticationFlowContext context, MultivaluedMap<String, String> inputData) {
+
+        if (context.getAuthenticatorConfig().getConfig().get(CONFIG_EXTERNAL_APP_URL) == null){
+
+            logger.error("get u  mother fucker ");
+            return true;
+        }
+
+//        return super.validateUserAndPassword(context, inputData);
+        String username = inputData.getFirst(AuthenticationManager.FORM_USERNAME).toString();
+        logger.info("User name is: {}",username);
+        if (username == null) {
+            context.getEvent().error(Errors.USER_NOT_FOUND);
+            Response challengeResponse = challenge(context, Messages.INVALID_USER);
+            context.failureChallenge(AuthenticationFlowError.INVALID_USER, challengeResponse);
+            logger.error("Empty username");
+            return false;
+        }
+
+
+        username = username.trim();
+        logger.info("Username: {}",username);
+        context.getEvent().detail(Details.USERNAME, username);
+        context.getAuthenticationSession().setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, username);
+        UserModel user = null;
+        try {
+            List users = context.getSession().users().searchForUserByUserAttributeStream(context.getRealm(), "gsm", username).collect(Collectors.toList());
+
+            if (users != null && users.size() == 1) {
+                user = (UserModel) users.get(0);
+                logger.info("get the phone number of the user {}: {}",username,user.getAttributes());
+                inputData.put("username", Collections.singletonList("clientRole"));
+                super.validateUserAndPassword(context,inputData);
+            }
+        } catch (ModelDuplicateException mde) {
+            if (mde.getDuplicateFieldName() != null && mde.getDuplicateFieldName().equals(UserModel.EMAIL)) {
+                setDuplicateUserChallenge(context, Errors.EMAIL_IN_USE, Messages.EMAIL_EXISTS, AuthenticationFlowError.INVALID_USER);
+            } else {
+                setDuplicateUserChallenge(context, Errors.USERNAME_IN_USE, Messages.USERNAME_EXISTS, AuthenticationFlowError.INVALID_USER);
+            }
+            return false;
+        }
+
+        if (invalidUser(context, user)) {
+            return false;
+        }
+
+        if (!validatePassword(context, user, inputData, false)) {
+            return false;
+        }
+
+        if (!enabledUser(context, user)) {
+            return false;
+        }
+
+        String rememberMe = inputData.getFirst("rememberMe").toString();
+        boolean remember = rememberMe != null && rememberMe.equalsIgnoreCase("on");
+        if (remember) {
+            context.getAuthenticationSession().setAuthNote(Details.REMEMBER_ME, "true");
+            context.getEvent().detail(Details.REMEMBER_ME, "true");
+        } else {
+            context.getAuthenticationSession().removeAuthNote(Details.REMEMBER_ME);
+        }
+        context.setUser(user);
+
+        return true;
+    }
+
+    private boolean invalidUser(AuthenticationFlowContext context, UserModel user) {
+        return true;
+    }}
+ and over here is the code for the factory: public class MobileAuthenticationFactory extends UsernamePasswordFormFactory  {
+
+    public static final String PROVIDER_ID = "phone-authenticator";
+    public static final GsmAuthenticator SINGLETON = new GsmAuthenticator();
+
+    public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+            AuthenticationExecutionModel.Requirement.REQUIRED,
+            AuthenticationExecutionModel.Requirement.DISABLED
+    };
+    private static final String WEBSITE_URL_PROP_NAME = "custom_website_url";
+    /**
+     * the provider configuration metadata definition
+     */
+    private static final List<ProviderConfigProperty> configMetadata;
+
+    static {
+        configMetadata = ProviderConfigurationBuilder.create()
+
+                // add the data source name property
+                .property()
+                .name(WEBSITE_URL_PROP_NAME)
+                .type(ProviderConfigProperty.STRING_TYPE)
+                .label("Csutom Website URL")
+                .defaultValue("https://www.example.com/site")
+                .helpText("The base URL of the custom website. Error messages will generate links back to this location.")
+                .add()
+
+                .build();
+    }
+
+    private String siteURL;
+
+    @Override
+    public Authenticator create(KeycloakSession session) {
+        System.out.println("GSM authenticator has been created");
+        return SINGLETON;
+    }
+
+    @Override
+    public void init(Config.Scope scope) {
+    }
+
+    @Override
+    public String getId() {
+        return PROVIDER_ID;
+    }
+
+    @Override
+    public String getDisplayType() {
+        return PROVIDER_ID;
+    }
+
+    @Override
+    public String getHelpText() {
+        return "Validates a mobile and password from login form.";
+    }
+}
+ I have done the deployment to keycloak and it seems it has done successfully, i can see the authenticator in the authentication tab, so what i have done next is creating a authentication flow and add the custom authenticator, then try the admin api to try get token , problem when ever I try to call the api the it return internal error , and keycloak logs return the flowing error: 2023-06-23 15:30:35,642 ERROR [org.keycloak.services.error.KeycloakErrorHandler] (executor-thread-27) Uncaught server error: java.lang.IllegalArgumentException: RESTEASY003715: path was null at org.jboss.resteasy.specimpl.ResteasyUriBuilderImpl.path(ResteasyUriBuilderImpl.java:382) at org.keycloak.authentication.AuthenticationProcessor$Result.getActionUrl(AuthenticationProcessor.java:566) at org.keycloak.authentication.AuthenticationProcessor$Result.form(AuthenticationProcessor.java:540) at org.keycloak.authentication.authenticators.browser.UsernamePasswordForm.challenge(UsernamePasswordForm.java:91) at org.keycloak.authentication.authenticators.browser.UsernamePasswordForm.authenticate(UsernamePasswordForm.java:81) at org.keycloak.authentication.DefaultAuthenticationFlow.processSingleFlowExecutionModel(DefaultAuthenticationFlow.java:445) at org.keycloak.authentication.DefaultAuthenticationFlow.processFlow(DefaultAuthenticationFlow.java:249) at org.keycloak.authentication.DefaultAuthenticationFlow.processSingleFlowExecutionModel(DefaultAuthenticationFlow.java:380) at org.keycloak.authentication.DefaultAuthenticationFlow.processFlow(DefaultAuthenticationFlow.java:271) at org.keycloak.authentication.AuthenticationProcessor.authenticateOnly(AuthenticationProcessor.java:1026) at org.keycloak.protocol.oidc.endpoints.TokenEndpoint.resourceOwnerPasswordCredentialsGrant(TokenEndpoint.java:639) at org.keycloak.protocol.oidc.endpoints.TokenEndpoint.processGrantRequestInternal(TokenEndpoint.java:223) at org.keycloak.protocol.oidc.endpoints.TokenEndpoint.access$100(TokenEndpoint.java:131) at org.keycloak.protocol.oidc.endpoints.TokenEndpoint$1.runInternal(TokenEndpoint.java:185) at org.keycloak.common.util.ResponseSessionTask.run(ResponseSessionTask.java:67) at org.keycloak.common.util.ResponseSessionTask.run(ResponseSessionTask.java:44) at org.keycloak.models.utils.KeycloakModelUtils.runJobInRetriableTransaction(KeycloakModelUtils.java:299) at org.keycloak.protocol.oidc.endpoints.TokenEndpoint.processGrantRequest(TokenEndpoint.java:178) at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) at java.base/java.lang.reflect.Method.invoke(Method.java:566) at org.jboss.resteasy.core.MethodInjectorImpl.invoke(MethodInjectorImpl.java:170) at org.jboss.resteasy.core.MethodInjectorImpl.invoke(MethodInjectorImpl.java:130) at org.jboss.resteasy.core.ResourceMethodInvoker.internalInvokeOnTarget(ResourceMethodInvoker.java:660) at org.jboss.resteasy.core.ResourceMethodInvoker.invokeOnTargetAfterFilter(ResourceMethodInvoker.java:524) at org.jboss.resteasy.core.ResourceMethodInvoker.lambda$invokeOnTarget$2(ResourceMethodInvoker.java:474) at org.jboss.resteasy.core.interception.jaxrs.PreMatchContainerRequestContext.filter(PreMatchContainerRequestContext.java:364) at org.jboss.resteasy.core.ResourceMethodInvoker.invokeOnTarget(ResourceMethodInvoker.java:476) at org.jboss.resteasy.core.ResourceMethodInvoker.invoke(ResourceMethodInvoker.java:434) at org.jboss.resteasy.core.ResourceLocatorInvoker.invokeOnTargetObject(ResourceLocatorInvoker.java:192) at org.jboss.resteasy.core.ResourceLocatorInvoker.invoke(ResourceLocatorInvoker.java:152) at org.jboss.resteasy.core.ResourceLocatorInvoker.invokeOnTargetObject(ResourceLocatorInvoker.java:183) at org.jboss.resteasy.core.ResourceLocatorInvoker.invoke(ResourceLocatorInvoker.java:141) at org.jboss.resteasy.core.ResourceLocatorInvoker.invoke(ResourceLocatorInvoker.java:32) at org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:492) at org.jboss.resteasy.core.SynchronousDispatcher.lambda$invoke$4(SynchronousDispatcher.java:261) at org.jboss.resteasy.core.SynchronousDispatcher.lambda$preprocess$0(SynchronousDispatcher.java:161) at org.jboss.resteasy.core.interception.jaxrs.PreMatchContainerRequestContext.filter(PreMatchContainerRequestContext.java:364) at org.jboss.resteasy.core.SynchronousDispatcher.preprocess(SynchronousDispatcher.java:164) at org.jboss.resteasy.core.SynchronousDispatcher.invoke(SynchronousDispatcher.java:247) at io.quarkus.resteasy.runtime.standalone.RequestDispatcher.service(RequestDispatcher.java:73) at io.quarkus.resteasy.runtime.standalone.VertxRequestHandler.dispatch(VertxRequestHandler.java:151) at io.quarkus.resteasy.runtime.standalone.VertxRequestHandler.handle(VertxRequestHandler.java:82) at io.quarkus.resteasy.runtime.standalone.VertxRequestHandler.handle(VertxRequestHandler.java:42) at io.vertx.ext.web.impl.RouteState.handleContext(RouteState.java:1284) at io.vertx.ext.web.impl.RoutingContextImplBase.iterateNext(RoutingContextImplBase.java:173) at io.vertx.ext.web.impl.RoutingContextImpl.next(RoutingContextImpl.java:140) at io.quarkus.vertx.http.runtime.StaticResourcesRecorder$2.handle(StaticResourcesRecorder.java:84) at io.quarkus.vertx.http.runtime.StaticResourcesRecorder$2.handle(StaticResourcesRecorder.java:71) at io.vertx.ext.web.impl.RouteState.handleContext(RouteState.java:1284) at io.vertx.ext.web.impl.RoutingContextImplBase.iterateNext(RoutingContextImplBase.java:173) at io.vertx.ext.web.impl.RoutingContextImpl.next(RoutingContextImpl.java:140) at io.quarkus.vertx.http.runtime.VertxHttpRecorder$6.handle(VertxHttpRecorder.java:430) at io.quarkus.vertx.http.runtime.VertxHttpRecorder$6.handle(VertxHttpRecorder.java:408) at io.vertx.ext.web.impl.RouteState.handleContext(RouteState.java:1284) at io.vertx.ext.web.impl.RoutingContextImplBase.iterateNext(RoutingContextImplBase.java:173) at io.vertx.ext.web.impl.RoutingContextImpl.next(RoutingContextImpl.java:140) at org.keycloak.quarkus.runtime.integration.web.QuarkusRequestFilter.lambda$createBlockingHandler$0(QuarkusRequestFilter.java:82) at io.quarkus.vertx.core.runtime.VertxCoreRecorder$14.runWith(VertxCoreRecorder.java:576) at org.jboss.threads.EnhancedQueueExecutor$Task.run(EnhancedQueueExecutor.java:2449) at org.jboss.threads.EnhancedQueueExecutor$ThreadBody.run(EnhancedQueueExecutor.java:1478) at org.jboss.threads.DelegatingRunnable.run(DelegatingRunnable.java:29) at org.jboss.threads.ThreadLocalResettingRunnable.run(ThreadLocalResettingRunnable.java:29) at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) at java.base/java.lang.Thread.run(Thread.java:829) any help would be much appreciated. java keycloak keycloak-spi Share Follow asked 15 mins ago kikicoderkikicoder 37333 silver badges1515 bronze badges Add a comment | Related questions 1274 Sort ArrayList of custom Objects by property 1 Setting up node oidc-provider with keycloak docker 0 How to implement parcelable with my custom class containing Hashmap and SparseArray? Related questions 1274 Sort ArrayList of custom Objects by property 1 Setting up node oidc-provider with keycloak docker 0 How to implement parcelable with my custom class containing Hashmap and SparseArray? 192 keycloak Invalid parameter: redirect_uri 1 Why onBindViewHolder index isn't incrementing in Recycler View? 4 @Context injection not working in Jersey ContainerRequestFilter (Dropwizard) Load 3 more related questions Show fewer related questions 0 Sorted by: Reset to default Highest score (default) Trending (recent votes count more) Date modified (newest first) Date created (oldest first) Know someone who can answer? Share a link to this question via email, Twitter, or Facebook. Your Answer Thanks for contributing an answer to Stack Overflow! Please be sure to answer the question. Provide details and share your research! But avoid … Asking for help, clarification, or responding to other answers. Making statements based on opinion; back them up with references or personal experience. To learn more, see our tips on writing great answers. Draft saved Draft discarded Sign up or log in Sign up using Google Sign up using Facebook Sign up using Email and Password Submit Post as a guest Name Email Required, but never shown Post as a guest Name Email Required, but never shown Post Your Answer Discard By clicking “Post Your Answer”, you agree to our terms of service and acknowledge that you have read and understand our privacy policy and code of conduct. Browse other questions tagged java keycloak keycloak-spi or ask your own question. The Overflow Blog Part man. Part machine. All farmer. Throwing away the script on testing (Ep. 583) Featured on Meta Statement from SO: June 5, 2023 Moderator Action Starting the Prompt Design Site: A New Home in our Stack Exchange Neighborhood Does the policy change for AI-generated content affect users who (want to)... Temporary policy: Generative AI (e.g., ChatGPT) is banned Hot Network Questions Do more legislative seats make Gerrymandering harder? Why exchange bishop for knight in this endgame? What's the oldest story where someone teleports into a solid or liquid? Martin's magic teapot Samsung SyncMaster 3 cannot show resolutions up from 800x600 despite manual saying otherwise What are Astral Diamonds made of? Word for the collectively leadership and important roles in a society Vertices of a regular dodecahedron Problems in NP with non-trivial certificate Did Andrew Tate claim his job was to seduce women and get them on a webcam? Why does NIST SP 800-90C RBG3 construction require XOR or reseeding a DRBG with a physical entropy source to produce full entropy? Does there exist a field where all even degree equations have solutions but not all odd degree equations? Can I add a second occupant to a hotel room at check-in? Safe to remove plastic chainring cover? Up and up they go Why is rock or metal often cold to the touch but wood or plastic is not? What parts of a spaceship would still work 100 million years later? Is this Order of Scribes wizard combo with the Elemental Bane and Faithful Hound spells a legal exploit? How can I get scheme product of two polynomials like this? Plausibility of using orbital mirrors to dig a canyon Is humor unacceptable in referee reports? What academic evidence is there of the pronunciation of gn as ɲn in Vulgar Latin? Electrical - Ground used a Neutral Are the names of lightroots the names of shrines spelled backwards? more hot questions Question feed Subscribe to RSS Question feed To subscribe to this RSS feed, copy and paste this URL into your RSS reader. lang-java Stack Overflow Questions Help Products Teams Advertising Collectives Talent Company About Press Work Here Legal Privacy Policy Terms of Service Contact Us Cookie Settings Cookie Policy Stack Exchange Network Technology Culture & recreation Life & arts Science Professional Business API Data Blog Facebook Twitter LinkedIn Instagram Site design / logo © 2023 Stack Exchange Inc; user contributions licensed under CC BY-SA. rev 2023.6.23.43507 Your privacy By clicking “Accept all cookies”, you agree Stack Exchange can store cookies on your device and disclose information in accordance with our Cookie Policy. Accept all cookies Necessary cookies only Customize settings

@@ -1,0 +1,1 @@
+The UserObjectID is not visible in the logs for some records in the Azure Log Analytics Workspace - Stack Overflow

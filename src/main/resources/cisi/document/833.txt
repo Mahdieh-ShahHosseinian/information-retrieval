@@ -1,0 +1,1 @@
+  Production costs of 79,831 cards are analyzed.  Cards wereproduced by four variants of the Columbia-Harvard-Yale procedureemploying an IBM 870 Document Writer and an IBM 1401 computer.Costs per card ranged from 8.8 to 9.8 cents for completed cards.

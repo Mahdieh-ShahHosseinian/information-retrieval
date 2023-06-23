@@ -1,0 +1,1 @@
+   Describes the characteristics, performance, and potential of SKED (Sort-KeyEdit), a generalized computer program for creating sort keys for MARC II records at the user's option.. SKED and a modification of the IBM S/360 DOStape sort/merge program form the basis for a comprehensive program for arranging catalog by computer..

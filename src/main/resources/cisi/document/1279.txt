@@ -1,0 +1,1 @@
+  Machine indexing and text searching offer an approachto the basic problems of library automation.

@@ -1,0 +1,1 @@
+Flutter Inspector does not showing in View>Tools Windows - Stack Overflow

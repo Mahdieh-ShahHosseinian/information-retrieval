@@ -1,0 +1,1 @@
+This article considers the conditions under which V. Ingve's theorem on thedepth of syntactic structures is applicable.The relations between graphs of generative phrase structure and phrasegovernment are studied.New operators for the generation of syntactic structures are introduced.

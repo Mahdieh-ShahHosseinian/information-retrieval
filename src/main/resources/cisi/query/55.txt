@@ -1,0 +1,1 @@
+What are the aims and objectives of the medical literature analysisand retrieval system (MEDLARS)?  How does MEDLARS operate?  What arethe possible applications of MEDLARS to future information retrievalsystems?

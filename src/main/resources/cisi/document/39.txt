@@ -1,0 +1,1 @@
+This report describes the results of automatic processingof a large number of scientific papers accordingto a rigorously defined criterion of coupling.  Thepopulation of papers under study was ordered into groups that satisfy the stated criterion of interrelation.An examination of the papers that constitute thegroups shows a high degree of logical correlation.

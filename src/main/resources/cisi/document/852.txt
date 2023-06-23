@@ -1,0 +1,1 @@
+   An economical classification process of order n log n (for n elements),which does not employ n-square procedures.. Conversion proofs are given andpossible information retrieval applications are discussed..

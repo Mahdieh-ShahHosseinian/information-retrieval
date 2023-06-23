@@ -1,0 +1,1 @@
+This monograph studies the external links between the sentences within aparagraph.Two basic problems are solved:	a formal apparatus for deriving simplifiedversions of the text's phrases is devised and the regularities in theformation of word strings are determined.Also considers future developments in the field of automatized abstracting.

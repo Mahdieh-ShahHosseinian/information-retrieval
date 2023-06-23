@@ -1,0 +1,1 @@
+Coordinate indexing utilizes descriptors for controlled language.  Ofwhat use are descriptors in the construction of an index?  How candescriptors be used for searching in an information retrieval system?

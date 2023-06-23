@@ -1,0 +1,1 @@
+mysql - Python is formatting the Primary Key cell value extracted via SQL query in some date format - Stack Overflow

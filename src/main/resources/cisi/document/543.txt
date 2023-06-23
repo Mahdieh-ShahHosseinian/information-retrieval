@@ -1,0 +1,1 @@
+  A common tool for the selection of serial publications for a researchlibrary is the lists of most cited serials.  The possibilities of this methodwere first studied by Gross and Gross who in 1927 applied a method ofsample statistical investigation to the grading of scientific serialsaccording to their relative importance based on citation counting from sourcejournals.

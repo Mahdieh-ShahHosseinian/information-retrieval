@@ -1,0 +1,1 @@
+This paper describes a system for the automatic synthesis of a text in a naturallanguage (Russian).The primary characteristic of this system is its semantic nature and theplurality of its synthesis.

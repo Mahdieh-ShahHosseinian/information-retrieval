@@ -1,0 +1,1 @@
+   A description is given of the file organization and design of an on-linecatalog suitable for automation of a library of one million books.. A method ofvirtual hash addressing allows rapid search of the indexes to the catalog file.. Storage of textual material in a compressed form allows considerablereduction in storage costs..

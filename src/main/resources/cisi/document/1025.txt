@@ -1,0 +1,1 @@
+  This manual is the culmination of a long search for a chemicalnotation that should consist of symbols limited to those on thestandard typewriter keyboard.  The necessity for such a notationhas been made almost inescapable by recent tremendous advances intechnology and the vast growth of chemical literature.

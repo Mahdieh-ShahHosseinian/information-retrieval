@@ -1,0 +1,1 @@
+How can access words in an information retrieval system be kept up to date?Word meanings and usage often change and lists must be dynamic to be current.What definitions of the problem and progress toward solutions have been madein providing necessary flexibility in systems of subject headings, indexwords, or other symbols used for getting at stored data?

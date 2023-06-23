@@ -1,0 +1,1 @@
+The standard method of finding information in today's libraries isthrough the use of the alphabetically arranged card catalog or theclassified catalog based on a classification system such as the DC orLC.  Can these systems be modified for use with automated informationretrieval?

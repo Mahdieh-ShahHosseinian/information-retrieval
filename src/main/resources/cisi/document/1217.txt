@@ -1,0 +1,1 @@
+  It is the purpose of this book to present a firm theoretical basis fornumerical taxonomy, to show why we believe numerical taxonomy hasadvantages over conventionally practiced taxonomy, to report on theprevious advances made in the field so far, and to furnish newcomers inthe field with a detailed step-by-step description of the proceduresemployed in numerical taxonomy.

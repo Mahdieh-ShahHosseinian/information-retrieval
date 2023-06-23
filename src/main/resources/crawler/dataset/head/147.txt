@@ -1,0 +1,1 @@
+Which relationship in Entity-Relationship (ER) models is equivalent to aggregation in UML? - Stack Overflow

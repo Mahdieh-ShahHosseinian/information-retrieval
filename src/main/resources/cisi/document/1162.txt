@@ -1,0 +1,1 @@
+It is suggested that the thesaurus be considered a hierarchical system forclassifying factors.The problem of automatic construction of thesaurus is posed.A formal description "input" and "output" of this problem is given; a seriesof classificational concepts is formulated.

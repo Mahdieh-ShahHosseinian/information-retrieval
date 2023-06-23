@@ -1,0 +1,1 @@
+   An experiment testing utility of truncated search keys as inquiry terms inan on-line system was performed on a file of 16,792 title-only bibliographicentries.. Use of a 3,3 key yields eight or fewer entries 99.0% of the time..

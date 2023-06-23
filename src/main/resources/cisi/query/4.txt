@@ -1,0 +1,1 @@
+Image recognition and any other methods of automaticallytransforming printed text into computer-ready form.

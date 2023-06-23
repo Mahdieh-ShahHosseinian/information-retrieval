@@ -1,0 +1,1 @@
+r - preventing easycsv::fread_zip from saving extracted files - Stack Overflow

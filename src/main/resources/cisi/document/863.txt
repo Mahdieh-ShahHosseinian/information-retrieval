@@ -1,0 +1,1 @@
+   A new processing format, based on MARC II and some of BNB's elaborations ofMARC II.. It further enlarges MARC II to encompass French cataloging practicesand filing arrangements in French catalogs..

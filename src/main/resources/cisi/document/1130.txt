@@ -1,0 +1,1 @@
+   The algorithmic procedure is based on a linguistic approach; it serves toisolate key phrases from the abstracts of the "Fizika" abstract journal, recognizing set phrases with the aid of linguistic rules.. The feasibility isdemonstrated of a completed formalization of the process of eliciting keyphrases for a descriptor dictionary.

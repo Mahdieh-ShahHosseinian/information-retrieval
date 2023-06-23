@@ -1,0 +1,1 @@
+   Briefly characterizes and compares the specifications for serial records ofthe MAR Serials Distribution Service, the National Serials Data Program, and theInternational Standard Bibliographic Description for Serials.. Both data content and, where applicable, machine format are analyzed..
